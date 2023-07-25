@@ -1,6 +1,6 @@
 # configured aws provider with proper credentials
 provider "aws" {
-   region     = "ap-south-1"
+   region     = "ca-central-1"
    profile    = "default"
 }
 
@@ -8,9 +8,9 @@ provider "aws" {
 # store the terraform state file in s3
 terraform {
   backend "s3" {
-    bucket  = "ex1-terraform-state-buckets"
+    bucket  = "ex2-terraform-state-buckets"
     key     = "build/terraform.tfstate"
-    region  = "ap-south-1"
+    region  = "ca-central-1"
     profile = "default"
   }
 }
