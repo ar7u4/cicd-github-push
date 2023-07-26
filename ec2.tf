@@ -1,4 +1,3 @@
-# configured aws provider with proper credentials
 terraform {
   required_providers {
     aws = {
@@ -8,9 +7,9 @@ terraform {
   }
 }
 
+# Configure the AWS Provider
 provider "aws" {
-   region     = "ca-central-1"
-   profile    = "default"
+  region = "ca-central-1" # define region as per your account
 }
 
 
