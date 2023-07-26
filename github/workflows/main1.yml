@@ -1,0 +1,35 @@
+name: Build Terraform
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install Terraform
+        run: |
+          chmod +x install-terraform.sh
+          ./install-terraform.sh
+
+      - name: Configure Named Profile
+        run: |
+          chmod +x configure-named-profile.sh
+          ./configure-named-profile.sh
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Validate Terraform
+        run: terraform validate
+
+      - name: Apply Terraform
+        run: terraform apply -auto-approve
