@@ -1,4 +1,13 @@
 # configured aws provider with proper credentials
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "4.12.1"
+    }
+  }
+}
+
 provider "aws" {
    region     = "ca-central-1"
    profile    = "default"
