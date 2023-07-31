@@ -9,7 +9,7 @@ terraform {
 
 # Configure the AWS Provider
 provider "aws" {
-  region = "ca-central-1" # define region as per your account
+  region = "ap-south-1" # define region as per your account
 }
 
 
@@ -18,7 +18,7 @@ terraform {
   backend "s3" {
     bucket  = "ex2-terraform-state-buckets"
     key     = "build/terraform.tfstate"
-    region  = "ca-central-1"
+    region  = "ap-south-1"
     profile = "default"
   }
 }
