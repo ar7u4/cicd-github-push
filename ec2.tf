@@ -9,16 +9,16 @@ terraform {
 
 # Configure the AWS Provider
 provider "aws" {
-  region = "ap-south-1" # define region as per your account
+  region = "eu-west-2" # define region as per your account
 }
 
 
 # store the terraform state file in s3
 terraform {
   backend "s3" {
-    bucket  = "ex6-terraform-state-buckets"
+    bucket  = "ex7-terraform-state-buckets"
     key     = "build/terraform.tfstate"
-    region  = "ap-south-1"
+    region  = "eu-west-2"
     profile = "default"
   }
 }
