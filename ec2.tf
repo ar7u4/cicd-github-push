@@ -180,7 +180,7 @@ resource "aws_lb_target_group" "my_target_group" {
   }
 }
 
-# register the EC2 instance with the target group
+# register the EC2 instance with the target group attach
 resource "aws_lb_target_group_attachment" "ec2_attachment" {
   target_group_arn = aws_lb_target_group.my_target_group.arn
   target_id        = aws_instance.ec2_instance.id
