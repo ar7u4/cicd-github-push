@@ -38,7 +38,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: terraform init -input=false
 
-    # Generates an execution plan for Terraform
+    # Generates an execution plan for Terraform12
     - name: Terraform Plan
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
