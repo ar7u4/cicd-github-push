@@ -98,6 +98,29 @@ data "aws_ami" "amazon_linux_2" {
   }
 }
 
+#adding loadbalancing
+resource "aws_elb" "techmax_elb" {
+  name = "techmax-elb"
+  subnets = [aws_default_subnet.default_az1.id, aws_default_subnet.default_az2.id]
+  security_groups = [aws_security_group.ec2_security_group.id]
+  listener {
+    instance_port = 80
+    instance_protocol = "http"
+    load_balancer_port = 80
+    protocol = "http"
+  }
+  health_check {
+    target = "HTTP:80/"
+    interval = 300
+    timeout = 5
+    healthy_threshold = 2
+    unhealthy_threshold = 3
+  }
+}
+
+output "elb_dns_url" {
+  value = aws_elb.techmax_elb.dns_name
+}
 
 # launch the ec2 instance and install website
 resource "aws_instance" "ec2_instance" {
