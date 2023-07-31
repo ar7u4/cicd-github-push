@@ -53,6 +53,11 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: terraform apply -auto-approve -input=false
       
+    - name: Upload Terraform Plan as Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: terraform-plan
+        path: tfplan.txt 
       
   zap_scan:
     needs: terraform
