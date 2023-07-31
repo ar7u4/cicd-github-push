@@ -132,8 +132,8 @@ resource "aws_lb" "my_load_balancer" {
   }
 }
 # create the target group for the load balancer
-resource "aws_lb_target_group" "my_target_group" {
-  name     = "my-target-group"
+resource "aws_lb_target_group" "my_target_group2" {
+  name     = "my-target-group2"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.my_vpc.id
@@ -148,7 +148,7 @@ resource "aws_lb_target_group" "my_target_group" {
   }
 
   tags = {
-    Name = "My Target Group"
+    Name = "My Target Group2"
   }
 }
 
