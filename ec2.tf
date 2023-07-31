@@ -49,6 +49,13 @@ resource "aws_subnet" "subnet_az2" {
   }
 }
 
+resource "aws_internet_gateway" "my_internet_gateway" {
+  vpc_id = aws_vpc.my_vpc.id
+
+  tags = {
+    Name = "My Internet Gateway"
+  }
+}
 # create security group for the EC2 instance
 resource "aws_security_group" "ec2_security_group" {
   name        = "ec2 security group"
