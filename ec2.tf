@@ -12,7 +12,7 @@ provider "aws" {
   region = "ca-central-1"
 }
 
-# store the terraform state file in S3 buckets
+# store the terraform state file in S3 bucketss
 terraform {
   backend "s3" {
     bucket  = "ex2-terraform-state-buckets"
