@@ -44,18 +44,6 @@ resource "aws_default_subnet" "default_az1" {
   }
 }
 
-# use data source to get all avalablility zones in region
-data "aws_availability_zones" "available_zones" {}
-
-
-# create default subnet if one does not exit
-resource "aws_default_subnet" "default_az1" {
-  availability_zone = data.aws_availability_zones.available_zones.names[0]
-
-  tags = {
-    Name = "default subnet"
-  }
-}
 
 
 # create security group for the ec2 instance
@@ -109,18 +97,6 @@ data "aws_ami" "amazon_linux_2" {
   }
 }
 
-# launch the ec2 instance and install website
-resource "aws_instance" "ec2_instance" {
-  ami                    = data.aws_ami.amazon_linux_2.id
-  instance_type          = "t2.micro"
-  subnet_id              = aws_default_subnet.default_az1.id
-  vpc_security_group_ids = [aws_security_group.ec2_security_group.id]
-  user_data              = file("install_techmax.sh")
-
-  tags = {
-    Name = "techmax server"
-  }
-}
 
 # create the load balancer
 resource "aws_lb" "my_load_balancer" {
