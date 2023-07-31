@@ -9,48 +9,51 @@ terraform {
 
 # Configure the AWS Provider
 provider "aws" {
-  region = "ca-central-1" # define region as per your account
+  region = "ca-central-1"
 }
 
-
-# store the terraform state file in s3
+# store the terraform state file in S3
 terraform {
   backend "s3" {
-    bucket  = "ex2-terraform-state-buckets"
+    bucket  = "ex2-terraform-state-buckets
     key     = "build/terraform.tfstate"
     region  = "ca-central-1"
     profile = "default"
   }
 }
 
-
-# create default vpc if one does not exit
-resource "aws_default_vpc" "default_vpc" {
-
+# create VPC
+resource "aws_vpc" "my_vpc" {
+  cidr_block = "10.0.0.0/16"
   tags = {
-    Name = "default vpc"
+    Name = "My VPC"
   }
 }
 
-# use data source to get all available availability zones in the region
-data "aws_availability_zones" "available_zones" {}
-
-# create default subnet if one does not exist
-resource "aws_default_subnet" "default_az1" {
-  availability_zone = data.aws_availability_zones.available_zones.names[0]
-
+# create subnets in different availability zones
+resource "aws_subnet" "subnet_az1" {
+  vpc_id     = aws_vpc.my_vpc.id
+  cidr_block = "10.0.1.0/24"
+  availability_zone = "ca-central-1a"
   tags = {
-    Name = "default subnet"
+    Name = "Subnet AZ1"
   }
 }
 
+resource "aws_subnet" "subnet_az2" {
+  vpc_id     = aws_vpc.my_vpc.id
+  cidr_block = "10.0.2.0/24"
+  availability_zone = "ca-central-1b"
+  tags = {
+    Name = "Subnet AZ2"
+  }
+}
 
-
-# create security group for the ec2 instance
+# create security group for the EC2 instance
 resource "aws_security_group" "ec2_security_group" {
   name        = "ec2 security group"
   description = "allow access on ports 80 and 22"
-  vpc_id      = aws_default_vpc.default_vpc.id
+  vpc_id      = aws_vpc.my_vpc.id
 
   ingress {
     description = "http access"
@@ -80,8 +83,7 @@ resource "aws_security_group" "ec2_security_group" {
   }
 }
 
-
-# use data source to get a registered amazon linux 2 ami
+# use data source to get a registered Amazon Linux 2 AMI
 data "aws_ami" "amazon_linux_2" {
   most_recent = true
   owners      = ["amazon"]
@@ -97,46 +99,11 @@ data "aws_ami" "amazon_linux_2" {
   }
 }
 
-
-# create the load balancer
-resource "aws_lb" "my_load_balancer" {
-  name               = "my-load-balancer"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.ec2_security_group.id]
-  subnets            = [aws_default_subnet.default_az1.id]
-
-  tags = {
-    Name = "My Load Balancer"
-  }
-}
-
-# create the target group for the load balancer
-resource "aws_lb_target_group" "my_target_group" {
-  name     = "my-target-group"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_default_vpc.default_vpc.id
-
-  health_check {
-    path                = "/"
-    protocol            = "HTTP"
-    interval            = 30
-    timeout             = 10
-    healthy_threshold   = 3
-    unhealthy_threshold = 3
-  }
-
-  tags = {
-    Name = "My Target Group"
-  }
-}
-
-# launch the ec2 instance and install website
+# launch the EC2 instance and install website
 resource "aws_instance" "ec2_instance" {
   ami                    = data.aws_ami.amazon_linux_2.id
   instance_type          = "t2.micro"
-  subnet_id              = aws_default_subnet.default_az1.id
+  subnet_id              = aws_subnet.subnet_az1.id
   vpc_security_group_ids = [aws_security_group.ec2_security_group.id]
   user_data              = file("install_techmax.sh")
 
@@ -145,13 +112,15 @@ resource "aws_instance" "ec2_instance" {
   }
 }
 
+# create the load balancer
+resource "aws_lb" "my_load_balancer" {
+  name               = "my-load-balancer"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.ec2_security_group.id]
+  subnets            = [aws_subnet.subnet_az1.id, aws_subnet.subnet_az2.id]
 
-# print the url of the server
-output "ec2_public_ipv4_url" {
-  value = join("", ["http://", aws_instance.ec2_instance.public_ip])
-}
-
-# print the URL of the load balancer
-output "load_balancer_dns" {
-  value = aws_lb.my_load_balancer.dns_name
+  tags = {
+    Name = "My Load Balancer"
+  }
 }
