@@ -12,7 +12,7 @@ provider "aws" {
   region = "ca-central-1"
 }
 
-# store the terraform state file in s3 bucket
+# store the terraform state file in S3
 terraform {
   backend "s3" {
     bucket  = "ex2-terraform-state-buckets"
@@ -22,7 +22,7 @@ terraform {
   }
 }
 
-# create VPC
+# create VPC with Internet Gateway and public subnets
 resource "aws_vpc" "my_vpc" {
   cidr_block = "10.0.0.0/16"
   tags = {
@@ -30,7 +30,14 @@ resource "aws_vpc" "my_vpc" {
   }
 }
 
-# create subnets in different availability zoness
+resource "aws_internet_gateway" "my_internet_gateway" {
+  vpc_id = aws_vpc.my_vpc.id
+
+  tags = {
+    Name = "My Internet Gateway"
+  }
+}
+
 resource "aws_subnet" "subnet_az1" {
   vpc_id     = aws_vpc.my_vpc.id
   cidr_block = "10.0.1.0/24"
@@ -49,13 +56,6 @@ resource "aws_subnet" "subnet_az2" {
   }
 }
 
-resource "aws_internet_gateway" "my_internet_gateway" {
-  vpc_id = aws_vpc.my_vpc.id
-
-  tags = {
-    Name = "My Internet Gateway"
-  }
-}
 # create security group for the EC2 instance
 resource "aws_security_group" "ec2_security_group" {
   name        = "ec2 security group"
@@ -119,7 +119,7 @@ resource "aws_instance" "ec2_instance" {
   }
 }
 
-# create the load balancer
+# create the load balancer with Internet-facing option
 resource "aws_lb" "my_load_balancer" {
   name               = "my-load-balancer"
   internal           = false
@@ -127,13 +127,16 @@ resource "aws_lb" "my_load_balancer" {
   security_groups    = [aws_security_group.ec2_security_group.id]
   subnets            = [aws_subnet.subnet_az1.id, aws_subnet.subnet_az2.id]
 
+  enable_deletion_protection = false  # Optional: Set to true if you want to enable deletion protection
+
   tags = {
     Name = "My Load Balancer"
   }
 }
+
 # create the target group for the load balancer
-resource "aws_lb_target_group" "my_target_group2" {
-  name     = "my-target-group2"
+resource "aws_lb_target_group" "my_target_group" {
+  name     = "my-target-group"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.my_vpc.id
@@ -148,7 +151,7 @@ resource "aws_lb_target_group" "my_target_group2" {
   }
 
   tags = {
-    Name = "My Target Group2"
+    Name = "My Target Group"
   }
 }
 
