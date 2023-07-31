@@ -131,7 +131,45 @@ resource "aws_lb" "my_load_balancer" {
     Name = "My Load Balancer"
   }
 }
+# create the target group for the load balancer
+resource "aws_lb_target_group" "my_target_group" {
+  name     = "my-target-group"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.my_vpc.id
 
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    interval            = 30
+    timeout             = 10
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+  }
+
+  tags = {
+    Name = "My Target Group"
+  }
+}
+
+# register the EC2 instance with the target group
+resource "aws_lb_target_group_attachment" "ec2_attachment" {
+  target_group_arn = aws_lb_target_group.my_target_group.arn
+  target_id        = aws_instance.ec2_instance.id
+  port             = 80
+}
+
+# create a listener for the load balancer
+resource "aws_lb_listener" "my_listener" {
+  load_balancer_arn = aws_lb.my_load_balancer.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.my_target_group.arn
+  }
+}
 output "load_balancer_dns" {
   value = aws_lb.my_load_balancer.dns_name
 }
